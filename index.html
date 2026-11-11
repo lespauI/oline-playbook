@@ -26,6 +26,13 @@ main{max-width:1600px}.controls{grid-template-columns:1.2fr 1fr 1fr auto;gap:24p
 
 .full-slide-page .looks-grid{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:1000px){.full-slide-page .looks-grid{grid-template-columns:1fr}}@media print{.full-slide-page .looks-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .header-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.language-buttons{display:flex;gap:4px}.language-buttons button{min-width:44px;padding:9px 11px}.direction{white-space:normal;text-align:center}.keys>*{min-width:0}@media(max-width:650px){header{flex-wrap:wrap}.header-actions{width:100%;justify-content:space-between}.play-heading{align-items:flex-start}.direction{font-size:12px}.play-heading h2{overflow-wrap:anywhere}}
+#print-notes{display:none}
+@media print{
+ #print-notes{display:block;break-before:page;font-size:12px;line-height:1.45;color:var(--ink)}
+ #print-notes h2{margin:0 0 12px;font-size:24px;line-height:1.2}
+ #print-notes .codes{grid-template-columns:repeat(2,minmax(0,1fr));margin:0 0 14px;padding:10px 0;border-block:1px solid var(--line)}
+ #print-notes p{margin:0 0 9px;break-inside:avoid}
+}
 </style>
 </head>
 <body>
@@ -46,7 +53,8 @@ main{max-width:1600px}.controls{grid-template-columns:1.2fr 1fr 1fr auto;gap:24p
 <div class="legend"><span><i class="dot"></i><strong>M = Mike</strong></span><span><strong>⊥</strong> Block</span><span><strong>Dashed line</strong> Read / help then climb</span><span><strong>Thick arrow</strong> HB path</span><span><strong>Red arrow</strong> Blitz</span></div>
 <p class="print-source">N = nose · E/T = defensive line · B/O = other linebackers · H = edge help</p>
 <details>
- <summary>Coach notes &amp; all play numbers</summary>
+ <summary id="coach-notes-title">Coach notes &amp; all play numbers</summary>
+ <div id="coach-notes-body">
  <div class="codes"><div><strong>20</strong> Straight through center</div><div><strong>21</strong> Between C and LG</div><div><strong>22</strong> Between C and RG</div><div><strong>23 / 24</strong> Outside zone left / right</div><div><strong>25 / 26</strong> Stretch left / right</div><div><strong>60 / 61</strong> Half-slide right / left</div><div><strong>90 / 91</strong> Full-slide right / left</div></div>
  <p><strong>Mike:</strong> the declared protection reference, usually the middle linebacker or the likely blitzer. These pass examples place Mike toward the called slide. Confirm the call; do not change direction silently.</p>
  <p><strong>Center in pass protection:</strong> an NT on C is the first job. With no NT, C is the middle blitz picker. Set backward and stay square. The center uses a shorter inside set. Tackles kick back and out to form the pocket. Set depth depends on the defender and the pass timing; keep the interior depth coordinated. The gray O-line markers show the start, and the solid markers show the set position. A 3–4 normally has a nose. The 4–3 example here uses two 3-technique tackles and no nose; a different 4–3 alignment may put a nose back on C.</p>
@@ -55,10 +63,15 @@ main{max-width:1600px}.controls{grid-template-columns:1.2fr 1fr 1fr auto;gap:24p
  <p><strong>Stretch pull rule:</strong> An NT takes priority: the backside guard pulls (RG on 25 left; LG on 26 right), and C stays on N. Against a 3-tech, C and the backside guard communicate and call one puller; the other player takes the 3-tech. The buttons show either example. Against a 5-tech with no NT or 3-tech inside, C pulls. A 5-tech end does not override an NT or 3-tech inside. Inside blockers secure the pulling player’s gap before he leaves. If an inside threat remains free, he stays and calls CHECK. The puller leads outside only after that coverage is secure.</p>
  <p><strong>H = edge help:</strong> an additional TE or H-back block is shown in the full 3–4 and 4–3 run looks. Assign the remaining formation blocks before using the play. A dangerous backside edge needs a declared answer; use the called CAP or SPLIT answer. Extra simultaneous blitzers require a protection adjustment or a QB hot answer.</p>
  <p><strong>Before the snap:</strong> Red-ring defenders on run pages still need a formation block, read, or check. A flow read is conditional: a linebacker who fills inside must have an answer before the pull. A lone edge pass blitz can use the called EDGE exchange when Mike drops and the inside is clear. On 60/61, edge plus Mike creates a local four-on-three overload; protect inside first and call the named hot route or change the protection.</p>
+ </div>
  <button type="button" id="print-all">Print all 11 play pages</button>
 </details>
 </main>
 <div id="print-book"></div>
+<section id="print-notes" aria-labelledby="print-notes-title">
+ <h2 id="print-notes-title"></h2>
+ <div id="print-notes-body"></div>
+</section>
 <script>
 (() => {
 'use strict';
@@ -764,6 +777,11 @@ $('print-all').addEventListener('click',()=>{
  $('print-book').innerHTML=plays.map(p=>`<div class="print-page">${playPage(p,p.kind==='pass'?state.pressure:'base','print-'+p.id,true)}</div>`).join('');
  localize($('print-book'));
  document.body.classList.add('book-print');window.print();
+});
+window.addEventListener('beforeprint',()=>{
+ $('print-notes-title').textContent=$('coach-notes-title').textContent;
+ const notes=$('coach-notes-body').cloneNode(true);
+ $('print-notes-body').replaceChildren(...notes.childNodes);
 });
 window.addEventListener('afterprint',()=>document.body.classList.remove('book-print'));
 render();
