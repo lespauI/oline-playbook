@@ -27,7 +27,9 @@ main{max-width:1600px}.controls{grid-template-columns:1.2fr 1fr 1fr auto;gap:24p
 .full-slide-page .looks-grid{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:1000px){.full-slide-page .looks-grid{grid-template-columns:1fr}}@media print{.full-slide-page .looks-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .header-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.language-buttons{display:flex;gap:4px}.language-buttons button{min-width:44px;padding:9px 11px}.direction{white-space:normal;text-align:center}.keys>*{min-width:0}@media(max-width:650px){header{flex-wrap:wrap}.header-actions{width:100%;justify-content:space-between}.play-heading{align-items:flex-start}.direction{font-size:12px}.play-heading h2{overflow-wrap:anywhere}}
 #print-notes{display:none}
+.fire-rule{margin:0 0 16px;padding:10px 12px;border-left:4px solid #bb433e;background:#fff0e9;color:#8f302d;font-size:14px;line-height:1.5;break-inside:avoid}
 @media print{
+ .fire-rule{font-size:10px;line-height:1.35;padding:6px 8px;margin:0 0 10px}
  #print-notes{display:block;break-before:page;font-size:12px;line-height:1.45;color:var(--ink)}
  #print-notes h2{margin:0 0 12px;font-size:24px;line-height:1.2}
  #print-notes .codes{grid-template-columns:repeat(2,minmax(0,1fr));margin:0 0 14px;padding:10px 0;border-block:1px solid var(--line)}
@@ -56,6 +58,7 @@ main{max-width:1600px}.controls{grid-template-columns:1.2fr 1fr 1fr auto;gap:24p
  <summary id="coach-notes-title">Coach notes &amp; all play numbers</summary>
  <div id="coach-notes-body">
  <div class="codes"><div><strong>20</strong> Straight through center</div><div><strong>21</strong> Between C and LG</div><div><strong>22</strong> Between C and RG</div><div><strong>23 / 24</strong> Outside zone left / right</div><div><strong>25 / 26</strong> Stretch left / right</div><div><strong>60 / 61</strong> Half-slide right / left</div><div><strong>90 / 91</strong> Full-slide right / left</div></div>
+ <div data-fire-coach-note></div>
  <p><strong>Mike:</strong> the declared protection reference, usually the middle linebacker or the likely blitzer. These pass examples place Mike toward the called slide. Confirm the call; do not change direction silently.</p>
  <p><strong>Center in pass protection:</strong> an NT on C is the first job. With no NT, C is the middle blitz picker. Set backward and stay square. The center uses a shorter inside set. Tackles kick back and out to form the pocket. Set depth depends on the defender and the pass timing; keep the interior depth coordinated. The gray O-line markers show the start, and the solid markers show the set position. A 3–4 normally has a nose. The 4–3 example here uses two 3-technique tackles and no nose; a different 4–3 alignment may put a nose back on C.</p>
  <p><strong>90 / 91 full-slide:</strong> 90 goes right; 91 goes left. Set backward and protect the called gaps. The backside tackle reads his nearest down rusher. Head-up or outside: call BOB, lock him, and keep the inside secure. Inside the tackle: join the slide. Four linemen slide when he uses BOB; all five slide when he joins. BOB means big on big, not chasing a stunt across the formation. HB checks inside first and takes the next backside edge threat. Call and secure each handoff before releasing a rusher.</p>
@@ -75,8 +78,11 @@ main{max-width:1600px}.controls{grid-template-columns:1.2fr 1fr 1fr auto;gap:24p
 <script>
 (() => {
 'use strict';
+const fireRule = `<p class="fire-rule"><strong>FIRE</strong> C, LG or RG can call FIRE when they see an inside blitz. On runs, FIRE cancels all double-team assignments. On passes, FIRE changes protection to BOB (big on big). <strong>FIRE CANNOT BE CANCELED.</strong></p>`;
 let language='en';
 const portuguese = {
+ "C, LG or RG can call FIRE when they see an inside blitz. On runs, FIRE cancels all double-team assignments. On passes, FIRE changes protection to BOB (big on big).": "C, LG ou RG podem chamar FIRE ao verem um blitz pelo meio. Nas corridas, FIRE cancela todas as tarefas de bloqueio em dupla. Nos passes, FIRE muda a proteção para BOB (bloqueio individual).",
+ "FIRE CANNOT BE CANCELED.": "FIRE NÃO PODE SER CANCELADO.",
  "O-line Playbook": "Manual da linha ofensiva",
  "O-LINE": "LINHA OFENSIVA",
  "One play. One job.": "Uma jogada. Uma missão.",
@@ -742,7 +748,7 @@ function playPage(play,pressure,uid,printing=false){
  if(play.kind==='pass'&&!full)k[2]='C: N first; otherwise middle.';
  const labels=full?['1 · SET','2 · SLIDE','3 · BACKSIDE TACKLE']:stretch?['NT OVER C','3-TECH OVER GUARD','5-TECH · INSIDE CLEAR']:play.kind==='pass'?['1 · SET','2 · CALL','3 · CENTER']:['1 · FIRST STEP','2 · TEAMWORK','3 · TARGET'];
  const pressureName={base:'Base read',mike:'Mike blitz',back:full?'Backside edge blitz':'Backside blitz',edge:'EDGE called · Mike drops',overload:full?'Edge + Mike':'Edge + Mike · local overload'}[pressure];
- return `<section class="play-page${stretch?' stretch-page':play.kind==='pass'?' pass-page':''}${full?' full-slide-page':''}"><div class="play-heading"><div><h2>${play.id} · ${play.name}</h2><p>${full?'All four looks · backside tackle read':stretch?'All four looks · call one puller':'All three defensive looks'}${play.kind==='pass'?' · '+pressureName:''}</p></div><div class="direction">${play.dir===0?'↑ MIDDLE':play.dir>0?'RIGHT →':'← LEFT'}</div></div><div class="keys">${k.map((v,i)=>`<div class="key"><span>${labels[i]}</span>${v}</div>`).join('')}</div>${stretch?`<p class="pull-condition${state.pullGapClear?'':' stop'}">${state.pullGapClear?'Example: inside gap covered. Pull only after your teammate secures the inside block.':'FREE INSIDE THREAT: STAY + CALL. Do not pull. Do not run until the call is fixed.'}</p>`:''}<div class="looks-grid">${pageFronts(play).map(f=>card(play,f,pressure,uid+'-'+f,printing)).join('')}</div><p class="page-key">${pageLegend(play)}</p></section>`;
+ return `<section class="play-page${stretch?' stretch-page':play.kind==='pass'?' pass-page':''}${full?' full-slide-page':''}"><div class="play-heading"><div><h2>${play.id} · ${play.name}</h2><p>${full?'All four looks · backside tackle read':stretch?'All four looks · call one puller':'All three defensive looks'}${play.kind==='pass'?' · '+pressureName:''}</p></div><div class="direction">${play.dir===0?'↑ MIDDLE':play.dir>0?'RIGHT →':'← LEFT'}</div></div>${fireRule}<div class="keys">${k.map((v,i)=>`<div class="key"><span>${labels[i]}</span>${v}</div>`).join('')}</div>${stretch?`<p class="pull-condition${state.pullGapClear?'':' stop'}">${state.pullGapClear?'Example: inside gap covered. Pull only after your teammate secures the inside block.':'FREE INSIDE THREAT: STAY + CALL. Do not pull. Do not run until the call is fixed.'}</p>`:''}<div class="looks-grid">${pageFronts(play).map(f=>card(play,f,pressure,uid+'-'+f,printing)).join('')}</div><p class="page-key">${pageLegend(play)}</p></section>`;
 }
 function render(){
  const p=plays.find(x=>x.id===state.play);
@@ -784,6 +790,7 @@ window.addEventListener('beforeprint',()=>{
  $('print-notes-body').replaceChildren(...notes.childNodes);
 });
 window.addEventListener('afterprint',()=>document.body.classList.remove('book-print'));
+$('coach-notes-body').querySelector('[data-fire-coach-note]').innerHTML=fireRule;
 render();
 })();
 </script>
